@@ -16,6 +16,9 @@ subjs = ["XXX_01","XXX_02",]
 runs = ["1","3"]
 # create new lists, if you want to try things on single subjects or runs
 
+#dictionary with conditions/triggers for plotting
+event_id = {'rest': 220,}
+
 # collecting the files for annotation into a list
 filelist = []
 for sub in subjs:
@@ -48,4 +51,4 @@ cyc = Cycler(filelist)
 
 
 # Tipps: click on bad channels to mark them (they're easily spotted from the PSD plot); press 'a' to switch in annotation mode and drag the mouse over 'BAD' segments to mark with that label
-# important: close the plot to save the markings! - then do cyc.save() to save the file 
+# important: close the plot to save the markings! - then do cyc.save() to save the file
