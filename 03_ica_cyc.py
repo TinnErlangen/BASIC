@@ -14,13 +14,7 @@ runs = ["1","3"]
 # create new lists, if you want to try things on single subjects or runs
 
 #dictionary with conditions/triggers for plotting
-event_id = {'rest':100, 'baseline':80,
-            'sound/tinn/neg/r1':110, 'sound/tinn/neg/r2':130, 'sound/tinn/neg/s1':150, 'sound/tinn/neg/s2':170,
-            'sound/tinn/pos/r1':120, 'sound/tinn/pos/r2':140, 'sound/tinn/pos/s1':160, 'sound/tinn/pos/s2':180,
-            'sound/iads/neg/max':210, 'sound/iads/neg/mid':220, 'sound/iads/pos/mid':230, 'sound/iads/pos/max':240,
-            'exp/tinn/neg/r1':115, 'exp/tinn/neg/r2':135, 'exp/tinn/neg/s1':155, 'exp/tinn/neg/s2':175,
-            'exp/tinn/pos/r1':125, 'exp/tinn/pos/r2':145, 'exp/tinn/pos/s1':165, 'exp/tinn/pos/s2':185,
-            'exp/iads/neg/max':215, 'exp/iads/neg/mid':225, 'exp/iads/pos/mid':235, 'exp/iads/pos/max':245}
+event_id = {'rest':100, }   # change to fit your data 
 
 #collecting the files : triplets of annotated epoch file and corresponding reference and MEG ica result files
 filelist = []
