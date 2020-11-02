@@ -7,11 +7,10 @@ import numpy as np
 plt.ion() #this keeps plots interactive
 
 # define file locations
-proc_dir = "D:/CEMO_analyses/preproc/"
+proc_dir = "D:/XXX/proc/"
 # pass subject and run lists
-subjs = ["CEM_06","CEM_07","CEM_08","CEM_09"]
-# subjs = ["CEM_10"]
-runs = ["1","2","3","4","5"]
+subjs = ["XXX_01","XXX_02",]
+runs = ["1","3"]
 # create new lists, if you want to try things on single subjects or runs
 
 #dictionary with conditions/triggers for plotting
