@@ -1,4 +1,5 @@
 #step 5 - inspect the ICA results and select components to exclude for all files
+# see detailed instructions at the end of this script
 
 import mne
 import matplotlib.pyplot as plt
@@ -14,7 +15,7 @@ runs = ["1","3"]
 # create new lists, if you want to try things on single subjects or runs
 
 #dictionary with conditions/triggers for plotting
-event_id = {'rest':100, }   # change to fit your data 
+event_id = {'rest':100, }   # change to fit your data
 
 #collecting the files : triplets of annotated epoch file and corresponding reference and MEG ica result files
 filelist = []
@@ -119,3 +120,14 @@ cyc = Cycler(filelist, ref_comp_num)
 #then use the cyc.go() command each time to pop the next file pair in the list for component inspection and selection
 #and cyc.save() with "comps =" for the ones to be excluded when done -> it will save the 'cleaned' epochs in a new file
 #then cyc.go() goes on to the next file pair again... until list is empty
+
+## more NOTES:
+# running cyc.identify_bad(method="ref") will automatically put the ICs that pass the threshold into cyc.comps, which is the list of components to delete when saving
+# to add more components, the following works:
+# a) from the plot of ICs (plot_sources), where they are displayed like raw data in channels, click on components to exclude (like eog,ecg etc) - they will turn red,
+#    and after closing the plot(!) will be automatically added to cyc.comps
+# b) add components by number manually with cyc.comps += [number(s)]
+# very rarely, but sometimes, the reference channels can pick up a strong alpha signal from the brain, or the identify_bad method returns components that are not "bad" after inspection
+# as they are automatically added to cyc.comps by the identify_bad method, you will want to remove them manually from the list:
+# do that by number with cyc.comps.remove(number) (works only for one number at a time; if needed do it once for each component to remain/not remove)
+# check with typing just cyc.comps to see, if all and only the components you want to delete from the signal are in the list, then do cyc.save
