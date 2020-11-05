@@ -8,16 +8,16 @@ import numpy as np
 plt.ion() #this keeps plots interactive
 
 # define file locations
-proc_dir = "D:/XXX/proc/"
+proc_dir = "D:/XXX/"
 # pass subject and run lists
 subjs = ["XXX_01","XXX_02",]
-runs = ["1","3"]
+runs = ["1","2",]
 # create new lists, if you want to try things on single subjects or runs
 
 #dictionary with conditions/triggers for plotting
-event_id = {'rest':100, }   # change to fit your data
+event_id = {'rest':100,}   # change to fit your data
 
-#collecting the files : triplets of annotated epoch file and corresponding reference and MEG ica result files
+#collecting the files : triplets of annotated raw file and corresponding reference and MEG ica result files
 filelist = []
 for sub in subjs:
     for run in runs:
@@ -38,7 +38,7 @@ class Cycler():
         #the go() method plots all components and sources for inspection/selection
     def go(self,idx=0):
         plt.close('all')
-        # load the next epo/ICA files
+        # load the next raw/ICA files
         self.fn = self.filelist.pop(idx)
         self.raw = mne.io.Raw(self.fn[0],preload=True)
         self.events = np.load(self.fn[0][:-10]+"_events.npy")
