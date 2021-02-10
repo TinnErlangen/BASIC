@@ -20,7 +20,9 @@ breadths = np.array([1.5, 0.5, 0.5, 0.5, 0.5])
 # looping through the subjects...
 for sub in subjs:
     # get the subject path to this subjects raw data
-    sub_path = raw_dir+sub+"/"
+    sub_path = raw_dir+"nc_"+sub+"/"
+    sub_path = "{r}nc_{s}/".format(r=raw_dir,s=sub)
+
     # then loop through the run folders for this subject
     for run in runs:
         run_path = sub_path+run+"/"
