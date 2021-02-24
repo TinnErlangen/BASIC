@@ -4,12 +4,12 @@ import mne
 
 # define basic directories for file locations (adjust to your needs)
 base_dir = "D:/XXX_data/"
-raw_dir = base_dir+"raw/"   # where to find the original raw files
+raw_dir = base_dir + "raw/"   # where to find the original raw files
 proc_dir = "D:/XXX_analyses/proc/"    # location for saving processed data files
 
 # set up your lists for subjects and runs (BTI raw files are saved in runs in separate folders)
 subjs = ["XXX_01","XXX_02",]
-runs = ["1","2","3","4"]
+runs = ["1","2",]
 # create new lists, if you want to try things on single subjects or runs
 
 # define frequencies to apply notch filter to (electricity, monitor etc.)
@@ -20,8 +20,7 @@ breadths = np.array([1.5, 0.5, 0.5, 0.5, 0.5])
 # looping through the subjects...
 for sub in subjs:
     # get the subject path to this subjects raw data
-    sub_path = raw_dir+"nc_"+sub+"/"
-    sub_path = "{r}nc_{s}/".format(r=raw_dir,s=sub)
+    sub_path = raw_dir+sub+"/"
 
     # then loop through the run folders for this subject
     for run in runs:

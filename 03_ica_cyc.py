@@ -8,10 +8,10 @@ import numpy as np
 plt.ion() #this keeps plots interactive
 
 # define file locations
-proc_dir = "D:/XXX/"
+proc_dir = "X:/XXX/proc/"
 # pass subject and run lists
-subjs = ["XXX_01","XXX_02",]
-runs = ["1","2",]
+subjs = ["XXX_01",]
+runs = ["1",]
 # create new lists, if you want to try things on single subjects or runs
 
 #dictionary with conditions/triggers for plotting
@@ -57,7 +57,7 @@ class Cycler():
         # plot everything out for overview
         self.ica.plot_components(picks=list(range(40)))
         self.ica.plot_sources(self.raw)
-        self.raw.plot(duration=15.0,n_channels=90,scalings=dict(mag=1e-12,ref_meg=3e-12,misc=10),events=self.events,event_id=event_id)
+        self.raw.plot(duration=15.0,n_channels=90,scalings=dict(mag=0.5e-12,ref_meg=3e-12,misc=10),events=self.events,event_id=event_id)
         self.raw.plot_psd(fmax=95)
 
     def show_file(self):
@@ -99,7 +99,7 @@ class Cycler():
         test.load_data()
         test = self.ica.apply(test,exclude=comps)
         test.plot_psd(fmax=fmax)
-        test.plot(duration=15.0,n_channels=90,scalings=dict(mag=1e-12,ref_meg=3e-12,misc=10),events=self.events,event_id=event_id)
+        test.plot(duration=15.0,n_channels=90,scalings=dict(mag=0.5e-12,ref_meg=3e-12,misc=10),events=self.events,event_id=event_id)
         self.test = test
 
         #when saving, enter the MEG components to be excluded, bad reference components are excluded automatically
