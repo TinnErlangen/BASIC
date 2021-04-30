@@ -8,10 +8,10 @@ import numpy as np
 plt.ion() #this keeps plots interactive
 
 # define file locations
-proc_dir = "X:/XXX/proc/"
+proc_dir = "D:/XXX_analyses/proc/"
 # pass subject and run lists
-subjs = ["XXX_01",]
-runs = ["1",]
+subjs = ["XXX_01","XXX_02",]
+runs = ["1","2","3","4","5"]
 # create new lists, if you want to try things on single subjects or runs
 
 #dictionary with conditions/triggers for plotting
