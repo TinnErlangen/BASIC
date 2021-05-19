@@ -1,3 +1,6 @@
+## Beispiel Script für Exploration von Sensor-level Daten
+## ... in progress ...
+
 import mne
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,5 +35,3 @@ for sub in subjs:
         # plot PSD topomap for alpha band for each condition
         fig2 = epo[cond].plot_psd_topomap(bands=[(7, 13, 'Alpha')],bandwidth=1,vlim=(None,None),show=False)
         fig2.savefig("{d}{s}_{c}_alpha_topo.png".format(d=fig_dir,s=sub,c=cond))
-
-        
