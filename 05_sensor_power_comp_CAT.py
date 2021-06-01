@@ -10,7 +10,7 @@ plt.ioff()
 
 # define file locations
 proc_dir = "D:/TSM_test/CAT_proc/"
-fig_dir = "D:/TSM_test/CAT_proc/plot/"
+fig_dir = "D:/TSM_test/CAT_proc/plot/tinn-zahl/"
 # pass subject and run lists
 subjs = ["CAT_03","CAT_10","CAT_18",
          "CAT_06","CAT_11","CAT_12"]
@@ -82,14 +82,36 @@ for sub in subjs:
                                                                              tail=0, adjacency=adjacency, n_jobs=4, step_down_p=0,
                                                                              t_power=1, out_type='indices')
 
-    # here's where we will plot the clusters / differences ... in preparation
-    # # get the channel layout for out data; use channel names from our recording (same for all conds and subs)
-    # layout = mne.find_layout(epo.info)
-    # mag_names = [epo.ch_names[p] for p in mne.pick_types(epo.info, meg=True)]
-    # layout.names = mag_names
+    # now explore and plot the clusters
+    # get indices of good clusters
+    good_cluster_inds = np.where(cluster_pv < .05)[0]   # it's a tuple, with [0] we grab the array therein
+    # if there are any, do more...
+    if good_cluster_inds.any():
+        # then loop over clusters
+        for i_clu, clu_idx in enumerate(good_cluster_inds):
+            # unpack cluster information, get unique indices
+            freq_inds, ch_inds = clusters[clu_idx]
+            ch_inds = np.unique(ch_inds)
+            freq_inds = np.unique(freq_inds)
+
+            # get topography for F stat (mean over cluster freqs)
+            f_map = t_obs[freq_inds, ...].mean(axis=0)
+            # create spatial mask for plotting (setting cluster channels to "True")
+            mask = np.zeros((f_map.shape[0], 1), dtype=bool)
+            mask[ch_inds, :] = True
+            # plot average test statistic and mark significant sensors
+            f_evoked = mne.EvokedArray(f_map[:, np.newaxis], epo.info, tmin=0)
+            fig = f_evoked.plot_topomap(times=0, mask=mask, cmap='Reds',
+                                        vmin=np.min, vmax=np.max,scalings=1.0,
+                                        units="F_val", time_format= "",
+                                        title="Subject {}\nCluster {}\nFrequencies {}-{}".format(sub,
+                                        i_clu, int(tinn_freqs[freq_inds[0]]), int(tinn_freqs[freq_inds[-1]])),
+                                        mask_params=dict(markersize=4),
+                                        size = 6, show=False)
+            fig.savefig("{d}{s}_cluster_{f1}_to_{f2}_topo.png".format(d=fig_dir,s=sub,f1=int(tinn_freqs[freq_inds[0]]),f2=int(tinn_freqs[freq_inds[-1]])))
 
 
-# cluster permutation group statistics over subjects
+# CLUSTER PERMUTATION GROUP STATS OVER SUBJECTS
 # find sign. diffs between conditions in frequencies X channels clusters
 
 # prep the data for the permutation function:
@@ -111,8 +133,29 @@ t_obs, clusters, cluster_pv, H0 = mne.stats.spatio_temporal_cluster_test(X, thre
                                                                          tail=0, adjacency=adjacency, n_jobs=4, step_down_p=0,
                                                                          t_power=1, out_type='indices')
 
-# # here's where we will plot the clusters / differences ... in preparation
-# # get the channel layout for our data; use channel names from our recording (same for all conds and subs)
-# layout = mne.find_layout(epo.info)
-# mag_names = [epo.ch_names[p] for p in mne.pick_types(epo.info, meg=True)]
-# layout.names = mag_names
+# now explore and plot the clusters
+# get indices of good clusters
+good_cluster_inds = np.where(cluster_pv < .05)[0]   # it's a tuple, with [0] we grab the array therein
+# if there are any, do more...
+if good_cluster_inds.any():
+    # then loop over clusters
+    for i_clu, clu_idx in enumerate(good_cluster_inds):
+        # unpack cluster information, get unique indices
+        freq_inds, ch_inds = clusters[clu_idx]
+        ch_inds = np.unique(ch_inds)
+        freq_inds = np.unique(freq_inds)
+
+        # get topography for F stat (mean over cluster freqs)
+        f_map = t_obs[freq_inds, ...].mean(axis=0)
+        # create spatial mask for plotting (setting cluster channels to "True")
+        mask = np.zeros((f_map.shape[0], 1), dtype=bool)
+        mask[ch_inds, :] = True
+        # plot average test statistic and mark significant sensors
+        f_evoked = mne.EvokedArray(f_map[:, np.newaxis], epo.info, tmin=0)
+        fig = f_evoked.plot_topomap(times=0, mask=mask, cmap='Reds',
+                                    vmin=np.min, vmax=np.max,scalings=1.0,
+                                    units="F_val", time_format= "",
+                                    title="Group Statistics\nCluster {}\nFrequencies {}-{}".format(i_clu, int(tinn_freqs[freq_inds[0]]), int(tinn_freqs[freq_inds[-1]])),
+                                    mask_params=dict(markersize=4),
+                                    size = 6, show=False)
+        fig.savefig("{d}GA_cluster_{f1}_to_{f2}_topo.png".format(d=fig_dir,f1=int(tinn_freqs[freq_inds[0]]),f2=int(tinn_freqs[freq_inds[-1]])))
