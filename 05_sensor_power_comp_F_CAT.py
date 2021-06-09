@@ -1,5 +1,5 @@
-## Beispiel Script für Exploration von Sensor-level Daten
-## ... in progress ...
+## Explore Sensor-Level Data
+## Compare Conditions with Cluster-Permutation F-Test 
 
 import mne
 import numpy as np
