@@ -1,5 +1,5 @@
 ## Explore Sensor-Level Data
-## Compare Conditions with Cluster-Permutation F-Test 
+## Compare Conditions with Cluster-Permutation F-Test
 
 import mne
 import numpy as np
@@ -109,7 +109,7 @@ for sub in subjs:
                                         mask_params=dict(markersize=4),
                                         size = 6, show=False)
             fig.savefig("{d}{s}_cluster_{f1}_to_{f2}_topo.png".format(d=fig_dir,s=sub,f1=int(tinn_freqs[freq_inds[0]]),f2=int(tinn_freqs[freq_inds[-1]])))
-
+            breakpoint()
 
 # CLUSTER PERMUTATION GROUP STATS OVER SUBJECTS
 # find sign. diffs between conditions in frequencies X channels clusters

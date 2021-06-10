@@ -76,37 +76,37 @@ for sub in subjs:
     diff_X = np.transpose(diff_psds,(0,2,1))
     Diff_all.append(diff_X)
 
-    t_obs, clusters, cluster_pv, H0 = mne.stats.spatio_temporal_cluster_1samp_test(diff_X, threshold=threshold, n_permutations=1024,
-                                                                                   tail=0, adjacency=adjacency, n_jobs=4, step_down_p=0,
-                                                                                   t_power=1, out_type='indices')
-
-    # now explore and plot the clusters
-    # get indices of good clusters
-    good_cluster_inds = np.where(cluster_pv < .05)[0]   # it's a tuple, with [0] we grab the array therein
-    # if there are any, do more...
-    if good_cluster_inds.any():
-        # then loop over clusters
-        for i_clu, clu_idx in enumerate(good_cluster_inds):
-            # unpack cluster information, get unique indices
-            freq_inds, ch_inds = clusters[clu_idx]
-            ch_inds = np.unique(ch_inds)
-            freq_inds = np.unique(freq_inds)
-
-            # get topography for T stat (mean over cluster freqs)
-            t_map = t_obs[freq_inds, ...].mean(axis=0)
-            # create spatial mask for plotting (setting cluster channels to "True")
-            mask = np.zeros((t_map.shape[0], 1), dtype=bool)
-            mask[ch_inds, :] = True
-            # plot average test statistic and mark significant sensors
-            t_evoked = mne.EvokedArray(t_map[:, np.newaxis], epo.info, tmin=0)
-            fig = t_evoked.plot_topomap(times=0, mask=mask, cmap='bwr',
-                                        vmin=np.min, vmax=np.max,scalings=1.0,
-                                        units="T_val", time_format= "",
-                                        title="Subject {}\nT-Cluster {}\nFrequencies {}-{}".format(sub,
-                                        i_clu, int(tinn_freqs[freq_inds[0]]), int(tinn_freqs[freq_inds[-1]])),
-                                        mask_params=dict(markersize=4),
-                                        size = 6, show=False)
-            fig.savefig("{d}{s}_T-cluster_{f1}_to_{f2}_topo.png".format(d=fig_dir,s=sub,f1=int(tinn_freqs[freq_inds[0]]),f2=int(tinn_freqs[freq_inds[-1]])))
+    # t_obs, clusters, cluster_pv, H0 = mne.stats.spatio_temporal_cluster_1samp_test(diff_X, threshold=threshold, n_permutations=1024,
+    #                                                                                tail=0, adjacency=adjacency, n_jobs=4, step_down_p=0,
+    #                                                                                t_power=1, out_type='indices')
+    #
+    # # now explore and plot the clusters
+    # # get indices of good clusters
+    # good_cluster_inds = np.where(cluster_pv < .05)[0]   # it's a tuple, with [0] we grab the array therein
+    # # if there are any, do more...
+    # if good_cluster_inds.any():
+    #     # then loop over clusters
+    #     for i_clu, clu_idx in enumerate(good_cluster_inds):
+    #         # unpack cluster information, get unique indices
+    #         freq_inds, ch_inds = clusters[clu_idx]
+    #         ch_inds = np.unique(ch_inds)
+    #         freq_inds = np.unique(freq_inds)
+    #
+    #         # get topography for T stat (mean over cluster freqs)
+    #         t_map = t_obs[freq_inds, ...].mean(axis=0)
+    #         # create spatial mask for plotting (setting cluster channels to "True")
+    #         mask = np.zeros((t_map.shape[0], 1), dtype=bool)
+    #         mask[ch_inds, :] = True
+    #         # plot average test statistic and mark significant sensors
+    #         t_evoked = mne.EvokedArray(t_map[:, np.newaxis], epo.info, tmin=0)
+    #         fig = t_evoked.plot_topomap(times=0, mask=mask, cmap='bwr',
+    #                                     vmin=np.min, vmax=np.max,scalings=1.0,
+    #                                     units="T_val", time_format= "",
+    #                                     title="Subject {}\nT-Cluster {}\nFrequencies {}-{}".format(sub,
+    #                                     i_clu, int(tinn_freqs[freq_inds[0]]), int(tinn_freqs[freq_inds[-1]])),
+    #                                     mask_params=dict(markersize=4),
+    #                                     size = 6, show=False)
+    #         fig.savefig("{d}{s}_T-cluster_{f1}_to_{f2}_topo.png".format(d=fig_dir,s=sub,f1=int(tinn_freqs[freq_inds[0]]),f2=int(tinn_freqs[freq_inds[-1]])))
 
 
 # CLUSTER PERMUTATION GROUP STATS OVER SUBJECTS
@@ -153,3 +153,23 @@ if good_cluster_inds.any():
                                     mask_params=dict(markersize=4),
                                     size = 6, show=False)
         fig.savefig("{d}GA_T-cluster_{f1}_to_{f2}_topo.png".format(d=fig_dir,f1=int(tinn_freqs[freq_inds[0]]),f2=int(tinn_freqs[freq_inds[-1]])))
+
+
+## additional code to explore differences in spec. freq bands, even if no clusters found
+## we just define freq bands and plot the mean t-values (CondA - CondB) over the group
+
+# set up a dictionary defining your bands of interest, and assigning the indices (pointing to the freqs in tinn_freqs/zahl_freqs) of the boundaries you want
+# note: the indices are not frequencies in Hz, but grab the right values for freq bands in the data (Hz can be looked up in tinn_freqs)
+fois = {"Theta":(2,4), "Alpha_low":(5,7), "Alpha_high": (7,11), "Beta_low":(12,19), "Beta_high":(20,29), "Gamma":(29,38)}
+
+for band, bounds in fois.items():
+    t_map = t_obs[bounds[0]:bounds[1]+1, ...].mean(axis=0)
+    # plot average test statistic and mark significant sensors
+    t_evoked = mne.EvokedArray(t_map[:, np.newaxis], epo.info, tmin=0)
+    fig = t_evoked.plot_topomap(times=0, cmap='bwr',
+                                vmin=-2, vmax=2,scalings=1.0,   # notice that we use constant scaling for better comparison
+                                units="T_val", time_format= "",
+                                title="Group Difference T-Value Plot\n{} band - {} to {} Hz".format(band, int(tinn_freqs[bounds[0]])+1, int(tinn_freqs[bounds[1]])+1),
+                                mask_params=dict(markersize=4),
+                                size = 6, show=False)
+    fig.savefig("{d}GA_T-vals_{f1}_to_{f2}_Hz_topo.png".format(d=fig_dir,f1=int(tinn_freqs[bounds[0]])+1,f2=int(tinn_freqs[bounds[1]])+1))
