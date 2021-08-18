@@ -26,7 +26,7 @@ for sub in subjs:
     for run in runs:
         # loading raw data and events array
         raw = mne.io.Raw('{}{}_{}_ica-raw.fif'.format(proc_dir,sub,run))
-        events = np.load('{}nc_{}_{}_events.npy'.format(proc_dir,sub,run))
+        events = np.load('{}{}_{}_events.npy'.format(proc_dir,sub,run))
         # creating the epochs around our zero event triggers
         epochs = mne.Epochs(raw,events,event_id=zero_id,baseline=baseline,picks=['meg'],tmin=tmin,tmax=tmax,preload=True)
         # optional check, if it worked correctly
