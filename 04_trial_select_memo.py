@@ -39,38 +39,38 @@ for sub in subjs:
     # then check that n_epochs and n_beh_trials match
     if len(epo) != len(new_beh_trials):
         print("\n\n\nWARNING! Epochs and Ratings do not match! Check for error!\n\n\n")
-    # to get the ratings into the epoch labels, we have to build a new epochs file
-    # from rewriting the event triggers and providing a new event_id dictionary (see event_id at the top)
-    # we first need to extraxt the events array and make a list for looping:
-    events = list(epos.events)
+    # to get the ratings into the epoch labels, we have to somehow
+    # rewrite the event triggers and provide a new event_id dictionary (see event_id at the top)
+    # we do this with a "hack", by "pointing" to the events array
+    events = epo.events     # this is creating a pointer to change the epo.events -- it works here, but one usually shouldn't do this, not to mix up variables and lose control over what changes...
+    # we then make a list for looping and change the triggers to include the rating info
+    events = list(events)
     for ev,rat in zip(events,new_beh_trials):
         # check that triggers match, then add the rating value to the trigger value to yield the new event id
         if int(rat[0]) == ev[-1]:
             ev[-1] = ev[-1] + int(rat[1])
     events = np.array(events)
-    # now we gotta load the -ica-raw.fif once more, to make a new epochs object
-    raw = mne.io.Raw("{}{}_3_ica-raw.fif".format(proc_dir,sub))
-    # make sure to use the exact epoching parameters like in the other script (baseline etc.) !!!
-    new_epo = mne.Epochs(raw,events,event_id=event_id,baseline=(-0.1,0),tmin=-0.1,tmax=5,picks=['meg'])
-    # then, copy the epochs, and select them into 30 break (all sure, then random unsure) and 30 cont (all sure, then random unsure)
-    sel_epo = new_epo.copy()
+    # then we give epo its new dictionary
+    epo.event_id = event_id
+    # and check that everything worked
+    print(epo)
 
-    # get "sures" in each category and their numbers
-    b_sures = sel_epo["break/sure"]
-    n_b_sures = len(b_sures)
-    c_sures = sel_epo["cont/sure"]
-    n_c_sures = len(c_sures)
-    # then get "unsures" and how many are needed to fill up 30, then randomly select
-    b_unsures = sel_epo["break/unsure"]
-    n_b_rest = 30 - n_b_sures
-    # b_rest = random.sample(b_unsures,n_b_rest)  # see if random.sample works with epochs; it does with lists...
-    # if it doesn't work, get a list of indices to drop (! n_b_drop = len(b_unsures) - n_b_rest), and drop them from b_unsures
-    # to yield b_rest
-
-    c_unsures = sel_epo["cont/unsure"]
-    n_c_rest = 30 - n_c_sures
-    c_rest = random.sample(c_unsures,n_c_rest)
-
-    # then concatenate epochs to analysis set
-    sel_epo = mne.concatenate_epochs(b_sures,b_rest,c_sures,c_rest)
-    sel_epo.save("{}{}-analysis-epo.fif".format(proc_dir,sub))
+    # # get "sures" in each category and their numbers
+    # b_sures = sel_epo["break/sure"]
+    # n_b_sures = len(b_sures)
+    # c_sures = sel_epo["cont/sure"]
+    # n_c_sures = len(c_sures)
+    # # then get "unsures" and how many are needed to fill up 30, then randomly select
+    # b_unsures = sel_epo["break/unsure"]
+    # n_b_rest = 30 - n_b_sures
+    # # b_rest = random.sample(b_unsures,n_b_rest)  # see if random.sample works with epochs; it does with lists...
+    # # if it doesn't work, get a list of indices to drop (! n_b_drop = len(b_unsures) - n_b_rest), and drop them from b_unsures
+    # # to yield b_rest
+    #
+    # c_unsures = sel_epo["cont/unsure"]
+    # n_c_rest = 30 - n_c_sures
+    # c_rest = random.sample(c_unsures,n_c_rest)
+    #
+    # # then concatenate epochs to analysis set
+    # sel_epo = mne.concatenate_epochs(b_sures,b_rest,c_sures,c_rest)
+    # sel_epo.save("{}{}-analysis-epo.fif".format(proc_dir,sub))
