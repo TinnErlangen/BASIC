@@ -55,22 +55,88 @@ for sub in subjs:
     # and check that everything worked
     print(epo)
 
-    # # get "sures" in each category and their numbers
-    # b_sures = sel_epo["break/sure"]
-    # n_b_sures = len(b_sures)
-    # c_sures = sel_epo["cont/sure"]
-    # n_c_sures = len(c_sures)
-    # # then get "unsures" and how many are needed to fill up 30, then randomly select
-    # b_unsures = sel_epo["break/unsure"]
-    # n_b_rest = 30 - n_b_sures
-    # # b_rest = random.sample(b_unsures,n_b_rest)  # see if random.sample works with epochs; it does with lists...
-    # # if it doesn't work, get a list of indices to drop (! n_b_drop = len(b_unsures) - n_b_rest), and drop them from b_unsures
-    # # to yield b_rest
-    #
-    # c_unsures = sel_epo["cont/unsure"]
-    # n_c_rest = 30 - n_c_sures
-    # c_rest = random.sample(c_unsures,n_c_rest)
-    #
-    # # then concatenate epochs to analysis set
-    # sel_epo = mne.concatenate_epochs(b_sures,b_rest,c_sures,c_rest)
-    # sel_epo.save("{}{}-analysis-epo.fif".format(proc_dir,sub))
+    # now we want to select our analyses epochs
+    # get "sures" and "unsures" in each category
+    b_sures = epo["break/sure"]
+    b_unsures = epo["break/unsure"]
+    c_unsures = epo["cont/unsure"]
+    c_sures = epo["cont/sure"]
+    n_b_sures = len(b_sures)
+    n_b_unsures = len(b_unsures)
+    n_c_unsures = len(c_unsures)
+    n_c_sures = len(c_sures)
+    # you can comment this out, but for curiosity I'd like to print out the numbers for all conditions per tones
+    print(b_sures)
+    print(b_unsures)
+    print(c_unsures)
+    print(c_sures)
+    # we first check, if we get at least 30 trials in both categories
+    if (n_b_sures + n_b_unsures) >= 30 and (n_c_sures + n_c_unsures) >= 30:
+        # if so, starting with 'break' we look at the numbers rated "sure" to see if we can fill up 30 trials
+        if n_b_sures > 30:
+            # if yes, we drop as many as needed
+            ix_all = list(range(n_b_sures))
+            ix_drop = random.sample(ix_all,k=n_b_sures-30)
+            b_sures.drop(ix_drop, reason='RAND_SELECT')
+            concats = [b_sures]
+        elif n_b_sures < 30:
+            # if no, we fill the rest from "unsure"
+            ix_all = list(range(n_b_unsures))
+            n_drop = n_b_unsures - (30 - n_b_sures)
+            ix_drop = random.sample(ix_all,k=n_drop)
+            b_unsures.drop(ix_drop, reason='RAND_SELECT')
+            concats = [b_sures, b_unsures]
+        else:
+            concats = [b_sures]
+        # then we repeat the same for 'cont' and update the concats list
+        if n_c_sures > 30:
+            ix_all = list(range(n_c_sures))
+            ix_drop = random.sample(ix_all,k=n_c_sures-30)
+            c_sures.drop(ix_drop, reason='RAND_SELECT')
+            concats = concats + [c_sures]
+        elif n_c_sures < 30:
+            ix_all = list(range(n_c_unsures))
+            n_drop = n_c_unsures - (30 - n_c_sures)
+            ix_drop = random.sample(ix_all,k=n_drop)
+            c_unsures.drop(ix_drop, reason='RAND_SELECT')
+            concats = concats + [c_sures, c_unsures]
+        else:
+            concats = concats + [c_sures]
+    # if one category has less than 30 totals, we gotta select from there
+    # in case of low 'breaks':
+    elif (n_b_sures + n_b_unsures) < 30:
+        n_max = (n_b_sures + n_b_unsures)
+        concats = [b_sures, b_unsures]
+        if n_c_sures > n_max:
+            ix_all = list(range(n_c_sures))
+            ix_drop = random.sample(ix_all,k=n_c_sures-n_max)
+            c_sures.drop(ix_drop, reason='RAND_SELECT')
+            concats = concats + [c_sures]
+        elif n_c_sures < n_max:
+            ix_all = list(range(n_c_unsures))
+            n_drop = n_c_unsures - (n_max - n_c_sures)
+            ix_drop = random.sample(ix_all,k=n_drop)
+            c_unsures.drop(ix_drop, reason='RAND_SELECT')
+            concats = concats + [c_sures, c_unsures]
+        else:
+            concats = concats + [c_sures]
+    elif (n_c_sures + n_c_unsures) < 30:
+        n_max = n_c_sures + n_c_unsures
+        concats = [c_sures, c_unsures]
+        if n_b_sures > n_max:
+            ix_all = list(range(n_b_sures))
+            ix_drop = random.sample(ix_all,k=n_b_sures-n_max)
+            b_sures.drop(ix_drop, reason='RAND_SELECT')
+            concats = concats + [b_sures]
+        elif n_b_sures < n_max:
+            ix_all = list(range(n_b_unsures))
+            n_drop = n_b_unsures - (n_max - n_b_sures)
+            ix_drop = random.sample(ix_all,k=n_drop)
+            b_unsures.drop(ix_drop, reason='RAND_SELECT')
+            concats = concats + [b_sures, b_unsures]
+        else:
+            concats = concats + [b_sures]
+    # then concatenate epochs to analysis set
+    sel_epo = mne.concatenate_epochs(concats)
+    print(sel_epo)
+    sel_epo.save("{}{}-analysis-epo.fif".format(proc_dir,sub))
