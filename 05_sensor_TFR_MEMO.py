@@ -79,3 +79,30 @@ GA_diff_TFR.plot_topo(baseline=None,mode=None,layout=layout,fig_facecolor='white
 # GA_diff_TFR.plot_topo(baseline=None,mode=None,layout=layout,fig_facecolor='white',font_color='black',tmin=None,tmax=5.0,fmin=5,fmax=35,vmin=-1,vmax=1)
 # # or try a joint plot for 'peak tiles with title
 #GA_cont_TFR.plot_joint(timefreqs={(1, 10): (0.1, 2)},baseline=None,mode=None,title="GA - TFR response Negative-Positive")  # set favorite topo peaks here, value tuple sets windows centered on time and freq
+
+
+# STATISTICS - spatio-temporal cluster T-test cont vs. break for Alpha band (7-11 Hz)
+
+# we crop the TFRs to the alpha band, and collect the data arrays into a list container
+alpha_diff_TFRs = []
+for tfr in diff_TFRs:
+    copy = tfr.copy()
+    copy.crop(fmin=7,fmax=11)
+    alpha_diff_TFRs.append(copy.data)
+# then we average over the frequencies (= axis 1 in a channel x freq x times array)
+X_alpha_avg = [np.mean(x, axis=1) for x in alpha_diff_TFRs]
+# and swap the axes from (channels x times) to (times x channels) as needed in the stats array
+X_alpha_prep = [np.transpose(x, (1,0)) for x in X_alpha_avg]
+# then we convert the list into our data array for the stats, where the 1st dimension is observations (i.e. here, subjects)
+X_alpha_diff = np.array(X_alpha_prep)
+
+# make spatio-temporal cluster T-test
+# set parameters
+threshold = None
+# get channel connectivity for cluster permutation test
+adjacency, ch_names = mne.channels.find_ch_adjacency(epo.info, ch_type='mag')
+# MNE uses a 1sample T-test, i.e. one first subtracts the conditions, then tests against zero (that's why we used the diff_data directly)
+# needed data form: X = array of shape observations x times/freqs x locs/chans
+t_obs, clusters, cluster_pv, H0 = mne.stats.spatio_temporal_cluster_1samp_test(X_alpha_diff, threshold=threshold, n_permutations=1024,
+                                                                               tail=0, adjacency=adjacency, n_jobs=4, step_down_p=0,
+                                                                               t_power=1, out_type='indices')
