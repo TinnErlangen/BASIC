@@ -106,3 +106,29 @@ adjacency, ch_names = mne.channels.find_ch_adjacency(epo.info, ch_type='mag')
 t_obs, clusters, cluster_pv, H0 = mne.stats.spatio_temporal_cluster_1samp_test(X_alpha_diff, threshold=threshold, n_permutations=1024,
                                                                                tail=0, adjacency=adjacency, n_jobs=4, step_down_p=0,
                                                                                t_power=1, out_type='indices')
+
+# now explore and plot the clusters
+# get indices of good clusters
+good_cluster_inds = np.where(cluster_pv < .05)[0]   # it's a tuple, with [0] we grab the array therein
+# if there are any, do more...
+if good_cluster_inds.any():
+    # then loop over clusters
+    for i_clu, clu_idx in enumerate(good_cluster_inds):
+        # unpack cluster information, get unique indices
+        time_inds, ch_inds = clusters[clu_idx]
+        ch_inds = np.unique(ch_inds)
+        time_inds = np.unique(time_inds)
+
+        # get topography for T stat (mean over cluster freqs)
+        t_map = t_obs[time_inds, ...].mean(axis=0)
+        # create spatial mask for plotting (setting cluster channels to "True")
+        mask = np.zeros((t_map.shape[0], 1), dtype=bool)
+        mask[ch_inds, :] = True
+        # plot average test statistic and mark significant sensors
+        t_evoked = mne.EvokedArray(t_map[:, np.newaxis], epo.info, tmin=0)
+        fig = t_evoked.plot_topomap(times=0, mask=mask, cmap='bwr',
+                                    vmin=np.min, vmax=np.max,scalings=1.0,
+                                    units="T_val", time_format= "",
+                                    title="Alpha Power \n{} - {} ms".format(time_inds[0]*5-105, time_inds[-1]*5-105),
+                                    mask_params=dict(markersize=4),
+                                    size = 6, show=True)
