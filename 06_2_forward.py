@@ -26,7 +26,7 @@ for meg,mri in sub_dict.items():
     # build forward model from MRI and BEM  - for each experimental block
     fwd = mne.make_forward_solution(epo_info, trans=trans, src=src, bem=bem, meg=True, eeg=False, mindist=3.0, n_jobs=8)
     # # build averaged forward model for all blocks/conditions
-    # fwd = mne.average_forward_solutions([fwd_rest,fwd_ton,fwd_a,fwd_b], weights=None)     # in case you need to average forwards from several runs
+    # fwd = mne.average_forward_solutions([fwd_2,fwd_4], weights=None)     # in case you need to average forwards from several runs
     mne.write_forward_solution("{dir}{meg}-fwd.fif".format(dir=meg_dir,meg=meg),fwd,overwrite=True)
 
     # get info on dipoles and plot (optional)

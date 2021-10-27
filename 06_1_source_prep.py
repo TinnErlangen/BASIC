@@ -6,11 +6,15 @@ from nilearn import plotting
 
 ## remember: BRA52, ((FAO18, WKI71 - excl.)) have fsaverage MRIs (originals were defective)
 
-preproc_dir = "G:/TSM_test/NEM_proc/"
-trans_dir = "G:/TSM_test/NEM_proc/" # enter your special trans file folder here
-meg_dir = "G:/TSM_test/NEM_proc/"
-mri_dir = "G:/freesurfer/subjects/"
-sub_dict = {"NEM_14":"FIN23"}
+# preproc_dir = "G:/TSM_test/NEM_proc/"
+# trans_dir = "G:/TSM_test/NEM_proc/" # enter your special trans file folder here
+# meg_dir = "G:/TSM_test/NEM_proc/"
+meg_dir = "V:/Alle/Müller-Voggel/anne/"
+mri_dir = "D:/freesurfer/subjects/"
+sub_dict = {"TSM_02":"BAE51","TSM_07":"DTN25_fa","TSM_17":"EAH91_fa","TSM_19":"HHH42","TSM_26":"LEN04_fa",
+            "TSM_22":"NAI16_fa","TSM_16":"NIC98","TSM_11":"NLK24_fa","TSM_04":"NLL75_fa","TSM_21":"NNE17",
+            "TSM_15":"NOI26_fa","TSM_24":"NOR76","TSM_27":"NUT15_fa","TSM_20":"RTB16","TSM_23":"SRA67_fa",
+            "TSM_06":"VIM71_fa","TSM_13":"BEU80"}
 # sub_dict = {"NEM_26":"ENR41"}
 
 ## prep fsaverage
@@ -40,19 +44,19 @@ for meg,mri in sub_dict.items():
     bem_model = mne.make_bem_model(mri, subjects_dir=mri_dir, ico=5, conductivity=[0.3])
     bem = mne.make_bem_solution(bem_model)
     mne.write_bem_solution("{dir}{meg}-bem.fif".format(dir=meg_dir,meg=meg),bem)
-    mne.viz.plot_bem(subject=mri, subjects_dir=mri_dir, brain_surfaces='white', orientation='coronal')
-    # load trans-file and plot coregistration alignment
-    trans = "{dir}{mri}_{meg}-trans.fif".format(dir=trans_dir,mri=mri,meg=meg)
-    info = mne.io.read_info("{}{}_3-raw.fif".format(preproc_dir,meg))       # use your -epo.fif here
-    mne.viz.plot_alignment(info, trans, subject=mri, dig='fiducials', meg=['helmet', 'sensors'], eeg=False, subjects_dir=mri_dir, surfaces='head-dense', bem=bem)
+    # mne.viz.plot_bem(subject=mri, subjects_dir=mri_dir, brain_surfaces='white', orientation='coronal')
+    # # load trans-file and plot coregistration alignment
+    # trans = "{dir}{mri}_{meg}-trans.fif".format(dir=trans_dir,mri=mri,meg=meg)
+    # info = mne.io.read_info("{}{}_3-raw.fif".format(preproc_dir,meg))       # use your -epo.fif here
+    # mne.viz.plot_alignment(info, trans, subject=mri, dig='fiducials', meg=['helmet', 'sensors'], eeg=False, subjects_dir=mri_dir, surfaces='head-dense', bem=bem)
 
-    # build the surface source space for the subjects, with 'oct6' spacing
-    src = mne.setup_source_space(mri, spacing='oct6', surface="white", subjects_dir=mri_dir, n_jobs=8)  ## uses 'oct6' as default, i.e. 4.9mm spacing appr.
-    # print number of spaces and points, save
-    n = sum(src[i]['nuse'] for i in range(len(src)))
-    print('the src space contains %d spaces and %d points' % (len(src), n))
-    # save the mixed source space
-    src.save("{}{}-oct6-src.fif".format(meg_dir,meg), overwrite=True)
-    # plot the source space with points
-    src.plot()
-    mne.viz.plot_alignment(info, trans, subject=mri, dig='fiducials', meg=['helmet', 'sensors'], eeg=False, subjects_dir=mri_dir, surfaces='head-dense', bem=bem, src=src)
+    # # build the surface source space for the subjects, with 'oct6' spacing
+    # src = mne.setup_source_space(mri, spacing='oct6', surface="white", subjects_dir=mri_dir, n_jobs=8)  ## uses 'oct6' as default, i.e. 4.9mm spacing appr.
+    # # print number of spaces and points, save
+    # n = sum(src[i]['nuse'] for i in range(len(src)))
+    # print('the src space contains %d spaces and %d points' % (len(src), n))
+    # # save the mixed source space
+    # src.save("{}{}-oct6-src.fif".format(meg_dir,meg), overwrite=True)
+    # # plot the source space with points
+    # src.plot()
+    # mne.viz.plot_alignment(info, trans, subject=mri, dig='fiducials', meg=['helmet', 'sensors'], eeg=False, subjects_dir=mri_dir, surfaces='head-dense', bem=bem, src=src)
